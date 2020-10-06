@@ -7,7 +7,7 @@ import json
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-model = pickle.load(open('Final.pkl', 'rb'))
+model = pickle.load(open('best.pkl', 'rb'))
 
 @app.route('/')
 def home():

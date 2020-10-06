@@ -7,7 +7,7 @@ import json
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
-model = pickle.load(open('Final.pkl', 'rb'))
+model = pickle.load(open('best.pkl', 'rb'))
 
 @app.route('/')
 def home():
@@ -23,19 +23,44 @@ def predict():
         text = 1
     else:
         text =0
-
-    data = request.get_json()
-
-    # int_f eatures = [float(x) for x in request.form.values()]
-    final_features = [np.array(data['userdata'])]
-    print(final_features)
+    int_features = [float(x) for x in request.form.values()]
+    final_features = [np.array(int_features)]
+    
     prediction = model.predict(final_features)
+    prediction=model.predict_proba(final_features)
+    
+    alpha=0.70
+    beta=0.40 
+   # finalProb=[]
+    for i in prediction:
+     # print("list: i is:",i)
+      if i[1] > alpha and i[1]> i[0]:
+        ele =i[1]
+       # print("positive")
+        add=1
+        finalProb=add
+        #finalLabelProb.append(add)
+    
+      elif i[0]>beta and i[0]>i[1]:
+       # print("negative")
+        add=0
+        finalProb= add
+        #finalLabelProb.append(add)
+      else:
+        #print("abstention incurred")
+        add=2
+        ##remove prob with target as 2
+        finalProb=add
+    output=[]
 
-    output  = round(prediction[0], 13)
+    output.append(finalProb)
+    output.append(prediction[0])
+    #output = finalProb
+    #also display output from 'prediction' variable
 
-    # return render_template('index1.html', prediction_text='The Patient is {}'.format(output))
-    return json.dumps({'score':format(output)})
+    return render_template('index1.html', prediction_text1='Patient is (positive(1) or negative(0)= {}'.format(output[0]),prediction_text2='              Probabilities:{} '.format(output[1]))
+    #return json.dumps({prediction:format(output)})
+    
 
 if __name__ == "__main__":
-    app.run(debug=True,host='0.0.0.0', port=5023)
-    
+    app.run(debug=True)
