@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 from flask_cors import CORS
 
-model = pickle.load(open('RFCovidModel.pkl', 'rb'))
+model = pickle.load(open('best.pkl', 'rb'))
 app = flask.Flask(__name__)
 CORS(app)
 # app.config["DEBUG"] = True
