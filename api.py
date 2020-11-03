@@ -8,9 +8,9 @@ from flask_cors import CORS
 covid_model = pickle.load(open('RFCovidModel.pkl', 'rb'))
 heart_model = pickle.load(open('RF.pkl', 'rb'))
 model = pickle.load(open('done.pkl', 'rb'))
-model1=pickle.load(open('noWaist.pkl','rb'))
-model2=pickle.load(open('noTrigs983.pkl','rb'))
-model3=pickle.load(open('both.pkl','rb'))
+model1 = pickle.load(open('noWaist.pkl', 'rb'))
+model2 = pickle.load(open('noTrigs983.pkl', 'rb'))
+model3 = pickle.load(open('both.pkl', 'rb'))
 
 app = flask.Flask(__name__)
 CORS(app)
@@ -62,13 +62,14 @@ def calculate_covid():
 
     output.append(finalProb)
     output.append(prediction[0])
+    finalOutput = output[1]
     print("OUTPUT")
     print(output)
     # output.append(prediction[0])
     # also display output from 'prediction' variable
     return jsonify({'prediction': {
-        'positive': format(output[1])[0],
-        'negetive': format(output[1][0])
+        'positive': format(finalOutput[1]),
+        'negetive': format(finalOutput[0])
     }}), 200
 
 
@@ -99,42 +100,77 @@ def calculate_heart():
 
 @app.route('/diabetes/calculate', methods=['POST'])
 def calculate_diabetes():
-    if not request.json or not 'gender' or not 'age' or not 'bmi' or not 'waist' or not 'sysbp' or not 'diabp' or not 'albcr' or not 'choles' or not 'glucose' or not 'trigs' or not 'a1c' or not 'serumGlucose' in request.json:
-        return jsonify({'error': 1, 'message': 'insufficient data', 'data': {}}), 200
 
-    diabetes_data = [request.json['gender'], request.json['age'], request.json['bmi'], request.json['waist'], request.json['sysbp'],
-                  request.json['diabp'], request.json['albcr'], request.json['choles'], request.json['glucose'], request.json['trigs'], request.json['a1c'], request.json['serumGlucose']]
+    output1=""
 
-    int_features = [float(x) for x in diabetes_data]
-    int_features1=[]
-    for i in int_features:
-        #for male, it is zero
-        if i != 100:
-            int_features1.append(i)
-        
-    final_features = [np.array(int_features1)]
-    
-    if int_features[3]==100 and int_features[9]==100:
-        prediction = model3.predict(final_features)
-    elif int_features[9]==100:
-        prediction = model2.predict(final_features)
-    elif int_features[3]==100:
-        prediction = model1.predict(final_features)
-    else:
-        prediction = model.predict(final_features)
+    if request.json.keys() < {'gender','age','bmi','sysbp','diabp','albcr','choles','glucose','a1c','serumGlucose'}:
+     return jsonify({'error': 1, 'message': 'insufficient data', 'data': {}}), 200
+
+    elif request.json.keys() >= {'gender','age','bmi','sysbp','trigs','waist','diabp','albcr','choles','glucose','a1c','serumGlucose'}:
+
+     diabetes_data = [request.json['gender'], request.json['age'], request.json['bmi'], request.json['waist'], request.json['sysbp'],
+                         request.json['diabp'], request.json['albcr'], request.json['choles'], request.json['glucose'], request.json['trigs'], request.json['a1c'], request.json['serumGlucose']]
 
 
-    output = prediction[0]
-    if output==0:
-        output1='Normal'
-    elif output==1:
-        output1='Diabetic'
-    elif output==2:
-        output1='Pre-Diabetic'    
+     int_features = [float(x) for x in diabetes_data]
+     final_features = [np.array(int_features)]
+     prediction = model.predict(final_features)
+     output = prediction[0]
+     if output == 0:
+       output1 = 'Normal'
+     elif output == 1:
+       output1 = 'Diabetic'
+     elif output == 2:
+       output1 = 'Pre-Diabetic'
+
+    elif not 'waist' in request.json and request.json.keys() >= {'trigs'}:
+     diabetes_data = [request.json['gender'], request.json['age'], request.json['bmi'], request.json['sysbp'],
+                         request.json['diabp'], request.json['albcr'], request.json['choles'], request.json['glucose'], request.json['trigs'], request.json['a1c'], request.json['serumGlucose']]
+     int_features = [float(x) for x in diabetes_data]
+     final_features = [np.array(int_features)]
+     prediction = model1.predict(final_features)
+     output = prediction[0]
+     if output == 0:
+        output1 = 'Normal'
+     elif output == 1:
+        output1 = 'Diabetic'
+     elif output == 2:
+        output1 = 'Pre-Diabetic'
+
+    elif not 'trigs' in request.json and request.json.keys() >= {'waist'}:
+     diabetes_data = [request.json['gender'], request.json['age'], request.json['bmi'], request.json['waist'], request.json['sysbp'],
+                         request.json['diabp'], request.json['albcr'], request.json['choles'], request.json['glucose'], request.json['a1c'], request.json['serumGlucose']]
+
+     int_features = [float(x) for x in diabetes_data]
+     final_features = [np.array(int_features)]
+     prediction = model2.predict(final_features)
+     output = prediction[0]
+     if output == 0:
+       output1 = 'Normal'
+     elif output == 1:
+       output1 = 'Diabetic'
+     elif output == 2:
+       output1 = 'Pre-Diabetic'
+
+    else:    
+
+     diabetes_data = [request.json['gender'], request.json['age'], request.json['bmi'], request.json['sysbp'],
+                         request.json['diabp'], request.json['albcr'], request.json['choles'], request.json['glucose'], request.json['a1c'], request.json['serumGlucose']]
+
+     int_features = [float(x) for x in diabetes_data]
+     final_features = [np.array(int_features)]
+     prediction = model3.predict(final_features)
+     output = prediction[0]
+     if output == 0:
+       output1 = 'Normal'
+     elif output == 1:
+       output1 = 'Diabetic'
+     elif output == 2:
+       output1 = 'Pre-Diabetic'
+
+    return jsonify({'prediction': format(output1)}), 200   
 
     # output.append(prediction[0])
     # also display output from 'prediction' variable
-    return jsonify({'prediction': format(output1)}), 200
-
 
 app.run()
