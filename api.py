@@ -92,29 +92,29 @@ def calculate_heart():
     return jsonify({'prediction': format(output1)}), 200
 
 
-@app.route('/diabetes/calculate', methods=['POST'])
-def calculate_heart():
-    if not request.json or not 'age' or not 'gender' or not 'chest_pain_type' or not 'bp' or not 'chol' or not 'fbs' or not 'eks' or not 'hr' or not 'agina' or not 'depre' or not 'slope' in request.json:
-        return jsonify({'error': 1, 'message': 'insufficient data', 'data': {}}), 200
+# @app.route('/diabetes/calculate', methods=['POST'])
+# def calculate_heart():
+#     if not request.json or not 'age' or not 'gender' or not 'chest_pain_type' or not 'bp' or not 'chol' or not 'fbs' or not 'eks' or not 'hr' or not 'agina' or not 'depre' or not 'slope' in request.json:
+#         return jsonify({'error': 1, 'message': 'insufficient data', 'data': {}}), 200
 
-    heart_data = [request.json['age'], request.json['gender'], request.json['chest_pain_type'], request.json['bp'], request.json['chol'],
-                  request.json['fbs'], request.json['eks'], request.json['hr'], request.json['agina'], request.json['depre'], request.json['slope']]
+#     heart_data = [request.json['age'], request.json['gender'], request.json['chest_pain_type'], request.json['bp'], request.json['chol'],
+#                   request.json['fbs'], request.json['eks'], request.json['hr'], request.json['agina'], request.json['depre'], request.json['slope']]
 
-    int_features = [float(x) for x in heart_data]
-    final_features = [np.array(int_features)]
+#     int_features = [float(x) for x in heart_data]
+#     final_features = [np.array(int_features)]
 
-   # prediction = model.predict_proba(final_features)
-    prediction = heart_model.predict(final_features)
+#    # prediction = model.predict_proba(final_features)
+#     prediction = heart_model.predict(final_features)
 
-    output = prediction[0]
-    if output < 0.5:
-        output1 = 'Normal'
-    elif output > 0.5:
-        output1 = '10yr CHD risk'
+#     output = prediction[0]
+#     if output < 0.5:
+#         output1 = 'Normal'
+#     elif output > 0.5:
+#         output1 = '10yr CHD risk'
 
-    # output.append(prediction[0])
-    # also display output from 'prediction' variable
-    return jsonify({'prediction': format(output1)}), 200
+#     # output.append(prediction[0])
+#     # also display output from 'prediction' variable
+#     return jsonify({'prediction': format(output1)}), 200
 
 
 app.run()
